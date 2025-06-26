@@ -83,7 +83,9 @@ exports.login = async (req, res) => {
 };
 
 // ✅ SEND OTP for Login/Forgot Password
-exports.sendOTP = async (req, res) => {
+/*exports.sendOTP = async (req, res) => {
+
+
   const { email } = req.body;
   try {
     const user = await User.findOne({ email });
@@ -100,7 +102,58 @@ exports.sendOTP = async (req, res) => {
   } catch (err) {
     res.status(500).json({ message: 'Failed to send OTP', error: err.message });
   }
+};*/
+
+// ✅ SEND OTP for Login/Forgot Password
+exports.sendOTP = async (req, res) => {
+  const { email } = req.body;
+  try {
+    const user = await User.findOne({ email });
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    user.otp = otp;
+    user.otpExpires = Date.now() + 10 * 60 * 1000; // 10 minutes
+    await user.save();
+
+    const htmlContent = `
+      <div style="font-family: Arial, sans-serif; max-width: 500px; margin: auto; padding: 20px; border: 1px solid #e5e5e5; border-radius: 10px; background-color: #f9f9f9;">
+        <h2 style="color: #4b0082;">🎵 Welcome to Aaroh AI</h2>
+        <p style="font-size: 16px; color: #333;">You’ve successfully registered on <strong>Aaroh AI</strong> – the ultimate platform for real-time music practice feedback.</p>
+        
+        <p style="font-size: 16px; color: #333;">Here is your OTP to verify your account:</p>
+     
+        
+
+        <div style="margin: 20px 0; background-color: #007bff; color: #fff; font-size: 24px; font-weight: bold; padding: 15px; text-align: center; border-radius: 8px;">
+          ${otp}
+        </div>
+
+        <p style="font-size: 16px; color: #333;">
+          ✅ Track your pitch, tempo & tone <br>
+          ✅ Get instant feedback <br>
+          ✅ Visualize your progress with accuracy
+        </p>
+
+        <p style="font-size: 16px; color: #333;">We’re excited to have you on this musical journey. Start improving today! 🎶</p>
+
+        <a href="https://aarohai.in/dashboard" style="display: inline-block; margin-top: 20px; padding: 10px 20px; background-color: #4b0082; color: #fff; text-decoration: none; border-radius: 5px;">🎧 Go to Dashboard</a>
+
+        <hr style="margin-top: 30px;">
+        <p style="font-size: 12px; color: #888; text-align: center;">This OTP is valid for 10 minutes. Do not share it with anyone.</p>
+      </div>
+    `;
+
+    await sendEmail(email, `${otp}` , htmlContent);
+
+    res.status(200).json({ message: 'OTP sent to email' });
+  } catch (err) {
+    console.error('❌ Failed to send OTP:', err);
+    res.status(500).json({ message: 'Failed to send OTP', error: err.message });
+  }
 };
+
+
 
 // ✅ RESET PASSWORD using OTP
 exports.resetPassword = async (req, res) => {
