@@ -22,6 +22,8 @@ exports.uploadAudio = async (req, res) => {
 
   const filePath = `/uploads/${req.file.filename}`;
   console.log("📂 File saved at:", filePath);
+  console.log("📝 Saved File:", req.file.path);
+
 
   res.status(200).json({
     message: "Upload successful!",
@@ -29,7 +31,7 @@ exports.uploadAudio = async (req, res) => {
   });
 };
 
-exports.analyzeAudio = async (req, res) => {
+/*exports.analyzeAudio = async (req, res) => {
   const { audioPath } = req.body;
 
   if (!audioPath) {
@@ -45,4 +47,4 @@ exports.analyzeAudio = async (req, res) => {
   
 
   res.status(200).json({ message: "Feedback generated", feedback });
-};
+};*/

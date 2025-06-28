@@ -26,20 +26,42 @@ exports.register = async (req, res) => {
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
+        // Generate OTP
+const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
     // Save new user
     const newUser = new User({
       
       email,
       password: hashedPassword,
+      otp,
+      otpExpires: Date.now() + 10 * 60 * 1000, // 10 minutes
+      verified: false,
     });
 
     await newUser.save();
-    res.status(201).json({ message: 'User registered successfully' });
+     // Send OTP Email
+    await sendEmail(
+      email,
+      'Verify Your Email - Aaroh AI',
+      `
+      <div style="font-family: sans-serif; padding: 20px; background: #f0f4ff; border-radius: 8px;">
+        <h2 style="color: #4B0082;">Welcome to Aaroh AI 🎶</h2>
+        <p>Thanks for registering! Please verify your email using the OTP below:</p>
+        <div style="font-size: 24px; font-weight: bold; background: #007bff; color: white; padding: 10px; border-radius: 5px; text-align: center;">${otp}</div>
+        <p style="margin-top: 20px;">This OTP will expire in 10 minutes.</p>
+      </div>
+      `
+    );
+
+    res.status(201).json({ message: 'User registered. OTP sent to email.' });
+
   } catch (err) {
-    console.error('❌ Register Error:', err);
-    res.status(500).json({ error: 'Server error' });
+    console.error('❌ Registration error:', err);
+    res.status(500).json({ error: 'Server error during registration' });
   }
 };
+  
 
 
 // ✅ VERIFY OTP

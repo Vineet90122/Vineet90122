@@ -5,6 +5,7 @@ const authRoutes = require('./routes/authRoutes');
 const path = require("path");
 const fs = require('fs'); 
 const uploadRoutes = require("./routes/uploadRoutes");
+const analyzeRoutes = require('./routes/analyzeRoutes');
 
 require('dotenv').config(); 
 
@@ -31,6 +32,9 @@ if (!fs.existsSync(uploadDir)) {
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 app.use("/api", uploadRoutes);
 app.use('/api/auth', authRoutes);
+app.use('/api', analyzeRoutes);
+app.use("/api", require("./routes/uploadBothRoute"));
+
 
 app.get('/', (req, res) => {
   res.send('Auth System Running');
